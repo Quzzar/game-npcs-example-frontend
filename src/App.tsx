@@ -62,7 +62,7 @@ export default function App() {
       </AppShell.Navbar>
       <AppShell.Main>
         <Stack>
-          <Box>Conversation</Box>
+          <Box>Conversation - {npcs.find((n) => n.id === talkingToId)?.name}</Box>
           <ConvoSection
             npcs={npcs}
             talkingTo={npcs.find((n) => n.id === talkingToId)}
