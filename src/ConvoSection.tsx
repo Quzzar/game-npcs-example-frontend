@@ -2,9 +2,10 @@ import { Box, Button, Center, Group, Select, Avatar } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import {
-  IconPlayerStopFilled,
   IconPlayerPlayFilled,
   IconPlayerSkipForwardFilled,
+  IconPlayerStopFilled,
+  IconVolume,
 } from '@tabler/icons-react';
 import hark from 'hark';
 import SiriWave from 'siriwave';
@@ -23,6 +24,21 @@ export default function ConvoSection(props: {
 
   const player = useRef<HTMLAudioElement>();
   const audiowave = useRef<SiriWave>();
+
+  // iOS doesn't allow audio to play without user interaction
+  const isIOS = () => {
+    return true || /iPad|iPhone|iPod/.test(navigator.userAgent);
+  };
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  useEffect(() => {
+    if (!audioBlob) return;
+    const playButton = document.getElementById('ios-play-audio');
+    playButton?.addEventListener('click', () => {
+      playAudio(audioBlob);
+      setAudioBlob(null);
+    });
+  }, [audioBlob]);
+  //
 
   const isPlaying = () => {
     return player.current && player.current.duration > 0 && !player.current.paused;
@@ -70,7 +86,12 @@ export default function ConvoSection(props: {
       }
     );
     const response = await res.blob();
-    playAudio(response);
+
+    if (isIOS()) {
+      setAudioBlob(response);
+    } else {
+      playAudio(response);
+    }
   };
 
   const startRecording = () => {
@@ -193,19 +214,6 @@ export default function ConvoSection(props: {
               }}
             />
 
-            <Button
-              loading={loading}
-              size='sm'
-              variant='outline'
-              onClick={async () => {
-                player.current?.pause();
-                startRecording();
-              }}
-              rightSection={<IconPlayerSkipForwardFilled size='1.0rem' />}
-            >
-              Interrupt
-            </Button>
-            {/* 
             {isPlaying() ? (
               <Button
                 loading={loading}
@@ -247,7 +255,18 @@ export default function ConvoSection(props: {
                   </Button>
                 )}
               </>
-            )} */}
+            )}
+
+            {audioBlob && isIOS() && (
+              <Button
+                id='ios-play-audio'
+                size='sm'
+                variant='outline'
+                rightSection={<IconVolume size='1.0rem' />}
+              >
+                Play Audio
+              </Button>
+            )}
           </Group>
         </Center>
       </Box>
