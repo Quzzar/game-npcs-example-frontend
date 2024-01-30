@@ -12,7 +12,7 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch(`http://localhost:3000/npcs`, {
+      const res = await fetch(`https://game-nps-example.onrender.com/npcs`, {
         method: 'GET',
       });
       const response = (await res.json()) as { status: string; data: NPC[] };
