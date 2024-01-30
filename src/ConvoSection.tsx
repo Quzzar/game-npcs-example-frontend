@@ -193,6 +193,19 @@ export default function ConvoSection(props: {
               }}
             />
 
+            <Button
+              loading={loading}
+              size='sm'
+              variant='outline'
+              onClick={async () => {
+                player.current?.pause();
+                startRecording();
+              }}
+              rightSection={<IconPlayerSkipForwardFilled size='1.0rem' />}
+            >
+              Interrupt
+            </Button>
+            {/* 
             {isPlaying() ? (
               <Button
                 loading={loading}
@@ -234,7 +247,7 @@ export default function ConvoSection(props: {
                   </Button>
                 )}
               </>
-            )}
+            )} */}
           </Group>
         </Center>
       </Box>
