@@ -27,7 +27,7 @@ export default function ConvoSection(props: {
 
   // iOS doesn't allow audio to play without user interaction
   const isIOS = () => {
-    return true || /iPad|iPhone|iPod/.test(navigator.userAgent);
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
   };
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   useEffect(() => {
@@ -42,6 +42,9 @@ export default function ConvoSection(props: {
 
   const isPlaying = () => {
     return player.current && player.current.duration > 0 && !player.current.paused;
+  };
+  const isRecording = () => {
+    return recorder.current?.state === 'recording';
   };
 
   const startAudioWave = () => {
@@ -214,48 +217,32 @@ export default function ConvoSection(props: {
               }}
             />
 
-            {isPlaying() ? (
-              <Button
-                loading={loading}
-                size='sm'
-                variant='outline'
-                onClick={async () => {
+            <Button
+              loading={loading}
+              size='sm'
+              variant='outline'
+              onClick={async () => {
+                if (isPlaying()) {
                   player.current?.pause();
                   startRecording();
-                }}
-                rightSection={<IconPlayerSkipForwardFilled size='1.0rem' />}
-              >
-                Interrupt
-              </Button>
-            ) : (
-              <>
-                {recorder.current?.state === 'recording' ? (
-                  <Button
-                    loading={loading}
-                    size='sm'
-                    variant='outline'
-                    onClick={async () => {
-                      recorder.current?.stop();
-                    }}
-                    rightSection={<IconPlayerStopFilled size='1.0rem' />}
-                  >
-                    Stop Talking
-                  </Button>
+                } else if (isRecording()) {
+                  recorder.current?.stop();
+                } else {
+                  startRecording();
+                }
+              }}
+              rightSection={
+                isPlaying() ? (
+                  <IconPlayerSkipForwardFilled size='1.0rem' />
+                ) : isRecording() ? (
+                  <IconPlayerStopFilled size='1.0rem' />
                 ) : (
-                  <Button
-                    loading={loading}
-                    size='sm'
-                    variant='outline'
-                    onClick={async () => {
-                      startRecording();
-                    }}
-                    rightSection={<IconPlayerPlayFilled size='1.0rem' />}
-                  >
-                    Start Talking
-                  </Button>
-                )}
-              </>
-            )}
+                  <IconPlayerPlayFilled size='1.0rem' />
+                )
+              }
+            >
+              {isPlaying() ? 'Interrupt' : isRecording() ? 'Stop Talking' : 'Start Talking'}
+            </Button>
 
             {audioBlob && isIOS() && (
               <Button
@@ -264,7 +251,7 @@ export default function ConvoSection(props: {
                 variant='outline'
                 rightSection={<IconVolume size='1.0rem' />}
               >
-                Play Audio
+                Play
               </Button>
             )}
           </Group>
